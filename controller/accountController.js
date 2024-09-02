@@ -13,6 +13,7 @@ exports.deposit = async (req, res) => {
   }
 };
 
+
 exports.withdrawal = async (req, res) => {
   try {
     const { userId, amount } = req.body;
