@@ -1,6 +1,37 @@
 const User = require('../models/User');
 const Account = require('../models/Account');
+const { generateToken } = require('../utils/jwt'); 
 
+exports.createUser = async (req, res) => {
+  try {
+    const { name, email, initialBalance } = req.body;
+
+    // Create a new user
+    const user = await User.create({ name, email });
+
+    // Create an account for the user
+    const account = await Account.create({
+      userId: user.id,
+      balance: initialBalance || 0, 
+    });
+
+    // Generate a token for the user
+    const token = generateToken(user);
+
+    res.status(201).json({
+      message: 'User created successfully',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        balance: account.balance,
+      },
+      token,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -26,7 +57,6 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.userId, {
@@ -45,34 +75,6 @@ exports.getProfile = async (req, res) => {
       name: user.name,
       email: user.email,
       balance: user.Account.balance,
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-
-exports.createUser = async (req, res) => {
-  try {
-    const { name, email, initialBalance } = req.body;
-
-    // Create a new user
-    const user = await User.create({ name, email });
-
-    const account = await Account.create({
-      userId: user.id,
-      balance: initialBalance || 0, 
-    });
-
-    
-    res.status(201).json({
-      message: 'User created successfully',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        balance: account.balance,
-      },
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
